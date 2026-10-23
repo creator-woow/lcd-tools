@@ -1,0 +1,5 @@
+IndentWidth: 2
+ColumnLimit: 80
+AllowShortFunctionsOnASingleLine: true
+SortIncludes: true
+SeparateDefinitionBlocks: Always
