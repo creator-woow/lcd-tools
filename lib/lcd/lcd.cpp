@@ -1,9 +1,7 @@
 #include "lcd.h"
 
-Lcd::Lcd(LcdConfig config)
-    : rows_config_(config.rows_config), bus_(config.bus),
-      handlers_(config.handlers) {
-  init();
+Lcd::Lcd(const LcdConfig &config)
+    : rows_config_(config.rows_config), bus_(config.bus), timer_(config.timer) {
 }
 
 void Lcd::print_line(const char *text) {
@@ -18,15 +16,16 @@ void Lcd::print_animated_line(const LcdAnimationConfig &config) {
   LcdAnimationState &row_animation = animations_states_[cursor_position_.row];
   row_animation.active = true;
   row_animation.offset = 0;
-  row_animation.last_tick_time = handlers_.milliseconds_now();
+  row_animation.last_tick_time = timer_.milliseconds_now();
   row_animation.text = config.text;
   row_animation.step_delay_ms = config.step_delay_ms;
   row_animation.direction = config.direction;
+  row_animation.infinite = config.infinite;
   set_cursor_next_row();
 }
 
 void Lcd::tick() {
-  unsigned long ms_now = handlers_.milliseconds_now();
+  unsigned long ms_now = timer_.milliseconds_now();
 
   for (uint8_t row = 0; row < rows_config_.amount; row++) {
     LcdAnimationState &row_animation = animations_states_[row];
@@ -46,6 +45,58 @@ void Lcd::tick() {
     }
     row_animation.last_tick_time = ms_now;
   }
+}
+
+void Lcd::send_command(uint8_t command) { bus_.send_byte(command, false); }
+
+void Lcd::send_command(LcdCommand command) {
+  bus_.send_byte(static_cast<uint8_t>(command), false);
+}
+
+void Lcd::send_nibble_command(LcdCommand command) {
+  bus_.send_nibble(static_cast<uint8_t>(command), false);
+}
+
+void Lcd::send_data(uint8_t data) { bus_.send_byte(data, true); }
+
+void Lcd::begin() {
+  bus_.init();
+  timer_.delay_milliseconds(70);
+  send_nibble_command(LcdCommand::FunctionSet8Bit);
+  timer_.delay_milliseconds(70);
+  send_nibble_command(LcdCommand::FunctionSet8Bit);
+  timer_.delay_microseconds(150);
+  send_nibble_command(LcdCommand::FunctionSet8Bit);
+  timer_.delay_microseconds(150);
+  send_nibble_command(LcdCommand::FunctionSet4Bit);
+  timer_.delay_milliseconds(70);
+  send_command(LcdCommand::FunctionSet4Bit2Line);
+  timer_.delay_milliseconds(70);
+  send_command(LcdCommand::DisplayOff);
+  timer_.delay_milliseconds(70);
+  clear();
+  timer_.delay_milliseconds(70);
+  send_command(LcdCommand::EntryModeRight);
+  timer_.delay_milliseconds(70);
+  send_command(LcdCommand::DisplayOn);
+  timer_.delay_milliseconds(70);
+}
+
+void Lcd::clear() {
+  send_command(LcdCommand::ClearDisplay);
+  timer_.delay_milliseconds(5);
+}
+
+void Lcd::set_cursor(LcdCursorPosition cursor_position) {
+  if (cursor_position.row >= rows_config_.amount ||
+      cursor_position.cell >= rows_config_.width)
+    return;
+  uint8_t row_address = rows_config_.starts_addresses[cursor_position.row];
+  uint8_t command = static_cast<uint8_t>(LcdCommand::SetDdramAddress) |
+                    (row_address + cursor_position.cell);
+  send_command(command);
+  cursor_position_ = cursor_position;
+  timer_.delay_milliseconds(5);
 }
 
 void Lcd::tick_left_direction_animation(const LcdAnimationState &animation) {
@@ -78,59 +129,7 @@ void Lcd::tick_rigth_direction_animation(const LcdAnimationState &animation) {
   }
 }
 
-void Lcd::send_command(uint8_t command) { bus_.send_byte(command, false); }
-
-void Lcd::send_command(LcdCommand command) {
-  bus_.send_byte(static_cast<uint8_t>(command), false);
-}
-
-void Lcd::send_nibble_command(LcdCommand command) {
-  bus_.send_nibble(static_cast<uint8_t>(command), false);
-}
-
-void Lcd::send_data(uint8_t data) { bus_.send_byte(data, true); }
-
-void Lcd::init() {
-  bus_.init();
-  handlers_.delay_milliseconds(70);
-  send_nibble_command(LcdCommand::FunctionSet8Bit);
-  handlers_.delay_milliseconds(70);
-  send_nibble_command(LcdCommand::FunctionSet8Bit);
-  handlers_.delay_microseconds(150);
-  send_nibble_command(LcdCommand::FunctionSet8Bit);
-  handlers_.delay_microseconds(150);
-  send_nibble_command(LcdCommand::FunctionSet4Bit);
-  handlers_.delay_milliseconds(70);
-  send_command(LcdCommand::FunctionSet4Bit2Line);
-  handlers_.delay_milliseconds(70);
-  send_command(LcdCommand::DisplayOff);
-  handlers_.delay_milliseconds(70);
-  clear();
-  handlers_.delay_milliseconds(70);
-  send_command(LcdCommand::EntryModeRight);
-  handlers_.delay_milliseconds(70);
-  send_command(LcdCommand::DisplayOn);
-  handlers_.delay_milliseconds(70);
-}
-
 void Lcd::set_cursor_next_row() {
   const uint8_t row = cursor_position_.row + 1;
   set_cursor({.row = row, .cell = 0});
-}
-
-void Lcd::clear() {
-  send_command(LcdCommand::ClearDisplay);
-  handlers_.delay_milliseconds(5);
-}
-
-void Lcd::set_cursor(LcdCursorPosition cursor_position) {
-  if (cursor_position.row >= rows_config_.amount ||
-      cursor_position.cell >= rows_config_.width)
-    return;
-  uint8_t row_address = rows_config_.starts_addresses[cursor_position.row];
-  uint8_t command = static_cast<uint8_t>(LcdCommand::SetDdramAddress) |
-                    (row_address + cursor_position.cell);
-  send_command(command);
-  cursor_position_ = cursor_position;
-  handlers_.delay_milliseconds(5);
 }

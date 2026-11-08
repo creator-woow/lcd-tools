@@ -1,52 +1,30 @@
 #pragma once
+
 #include <stdint.h>
+
+#include "lcd_timer.h"
 
 using DigitalWriteHandler = void (*)(uint8_t pin, bool high);
 using SetOutputPinModeHandler = void (*)(uint8_t pin);
 using SetInputPinModeHandler = void (*)(uint8_t pin);
-using DelayMicroseconds = void (*)(uint64_t microseconds);
+using DelayMicroseconds = void (*)(unsigned int microseconds);
 
-struct LCDBusHandlers {
+struct LcdBusActions {
   DigitalWriteHandler digital_write;
   SetOutputPinModeHandler set_output_pin;
   SetInputPinModeHandler set_input_pin;
-  DelayMicroseconds delay_microseconds;
 };
 
-class LCDBus {
+class LcdBus {
 public:
-  virtual ~LCDBus() = 0;
-  virtual void send_nibble(uint8_t byte, bool is_data) = 0;
-  virtual void send_byte(uint8_t byte, bool is_data) = 0;
-  virtual void init() = 0;
+  explicit LcdBus(const LcdBusActions &actions, const LcdTimer &timer);
+  virtual ~LcdBus() = default;
+
+  virtual void send_nibble(uint8_t byte, bool is_data) const = 0;
+  virtual void send_byte(uint8_t byte, bool is_data) const = 0;
+  virtual void init() const = 0;
 
 protected:
-  LCDBusHandlers &handlers_;
-};
-
-struct LCDGPIOPins {
-  uint8_t pin_e = 11;
-  uint8_t pin_rs = 12;
-  uint8_t pin_d4 = 2;
-  uint8_t pin_d5 = 3;
-  uint8_t pin_d6 = 4;
-  uint8_t pin_d7 = 5;
-};
-
-class GPIOLCDBus : public LCDBus {
-public:
-  void send_nibble(uint8_t byte, bool is_data) override;
-  void send_byte(uint8_t byte, bool is_data) override;
-  void init() override;
-
-private:
-  void pulse_enable_pin();
-  LCDGPIOPins pins_;
-};
-
-class I2CLCDBus : public LCDBus {
-public:
-  void send_nibble(uint8_t byte, bool is_data) override;
-  void send_byte(uint8_t byte, bool is_data) override;
-  void init() override;
+  const LcdBusActions &actions_;
+  const LcdTimer &timer_;
 };

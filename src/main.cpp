@@ -1,10 +1,11 @@
-#include "lcd.h"
-#include "lcd_bus.h"
+#include <Arduino.h> // need to be imported for links to setup and loop functionsl
 
-Lcd display;
-GPIOLCDBus grio_bus;
+#include "lcd_arduino.h"
+
+ArduinoGpioLcd display;
 
 void setup() {
+  display.begin();
   display.print_animated_line({.text = "Hello, c++ programming!",
                                .direction = LcdAnimationDirection::Left,
                                .infinite = true});

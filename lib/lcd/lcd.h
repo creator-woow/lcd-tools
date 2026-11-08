@@ -1,17 +1,9 @@
 #pragma once
 
 #include <WString.h>
-#include <lcd_bus.h>
 
-using MillisecondsNowHandler = unsigned long (*)();
-using DelayMicrosecondsHandler = void (*)(uint64_t microseconds);
-using DelayMillisecondsHandler = void (*)(uint64_t milliseconds);
-
-struct LCDHandlers {
-  MillisecondsNowHandler milliseconds_now;
-  DelayMicrosecondsHandler delay_microseconds;
-  DelayMillisecondsHandler delay_milliseconds;
-};
+#include "lcd_bus.h"
+#include "lcd_timer.h"
 
 enum class LcdCommand : uint8_t {
   ClearDisplay = 0x01,
@@ -57,15 +49,15 @@ struct LcdCursorPosition {
 };
 
 struct LcdConfig {
-  const LcdRowsConfig rows_config;
-  LCDBus &bus;
-  const LCDHandlers &handlers;
+  const LcdBus &bus;
+  const LcdTimer &timer;
+  const LcdRowsConfig &rows_config;
 };
 
 class Lcd {
 public:
-  explicit Lcd();
-  explicit Lcd(LcdConfig config);
+  explicit Lcd(const LcdConfig &config);
+  void begin();
   void print_line(const char *text);
   void print_animated_line(const LcdAnimationConfig &rows_config);
   void tick();
@@ -76,15 +68,14 @@ private:
   void tick_rigth_direction_animation(const LcdAnimationState &animation);
   void set_cursor_next_row();
   void clear();
-  void init();
   void send_command(LcdCommand command);
   void send_command(uint8_t command);
   void send_nibble_command(LcdCommand command);
   void send_data(uint8_t data);
 
   const LcdRowsConfig rows_config_;
-  const LCDHandlers handlers_;
-  LCDBus &bus_;
+  const LcdBus &bus_;
+  const LcdTimer &timer_;
   LcdCursorPosition cursor_position_{0, 0};
   LcdAnimationState animations_states_[LcdRowsConfig::max_rows];
 };
