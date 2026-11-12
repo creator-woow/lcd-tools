@@ -22,7 +22,7 @@ public:
 
   virtual void send_nibble(uint8_t byte, bool is_data) const = 0;
   virtual void send_byte(uint8_t byte, bool is_data) const = 0;
-  virtual void init() const = 0;
+  virtual void begin() const = 0;
 
 protected:
   const LcdBusActions &actions_;

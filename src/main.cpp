@@ -5,7 +5,7 @@
 ArduinoGpioLcd display;
 
 void setup() {
-  display.begin();
+  display.Lcd::begin();
   display.print_animated_line({.text = "Hello, c++ programming!",
                                .direction = LcdAnimationDirection::Left,
                                .infinite = true});

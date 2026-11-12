@@ -16,7 +16,7 @@ public:
   explicit LcdGpioBus(const LcdBusActions &actions, const LcdTimer &timer,
                       const LcdGpioPins pins);
 
-  void init() const override;
+  void begin() const override;
   void send_nibble(uint8_t byte, bool is_data) const override;
   void send_byte(uint8_t byte, bool is_data) const override;
 

@@ -4,7 +4,7 @@ LcdGpioBus::LcdGpioBus(const LcdBusActions &actions, const LcdTimer &timer,
                        const LcdGpioPins pins)
     : LcdBus(actions, timer), pins_(pins) {}
 
-void LcdGpioBus::init() const {
+void LcdGpioBus::begin() const {
   actions_.set_output_pin(pins_.pin_rs);
   actions_.set_output_pin(pins_.pin_e);
   actions_.set_output_pin(pins_.pin_d4);

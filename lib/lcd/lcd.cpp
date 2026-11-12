@@ -60,7 +60,7 @@ void Lcd::send_nibble_command(LcdCommand command) {
 void Lcd::send_data(uint8_t data) { bus_.send_byte(data, true); }
 
 void Lcd::begin() {
-  bus_.init();
+  bus_.begin();
   timer_.delay_milliseconds(70);
   send_nibble_command(LcdCommand::FunctionSet8Bit);
   timer_.delay_milliseconds(70);
