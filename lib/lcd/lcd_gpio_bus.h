@@ -17,7 +17,7 @@ public:
                       const LcdGpioPins pins);
 
   void begin() const override;
-  void send_nibble(uint8_t byte, bool is_data) const override;
+  void send_high_nibble(uint8_t byte, bool is_data) const override;
   void send_byte(uint8_t byte, bool is_data) const override;
 
 private:

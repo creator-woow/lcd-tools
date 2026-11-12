@@ -57,7 +57,7 @@ struct LcdConfig {
 class Lcd {
 public:
   explicit Lcd(const LcdConfig &config);
-  void begin();
+  void init();
   void print_line(const char *text);
   void print_animated_line(const LcdAnimationConfig &rows_config);
   void tick();
