@@ -8,9 +8,9 @@ class LcdPcdf8574Bus : public LcdBus {
 public:
   LcdPcdf8574Bus(uint8_t address, I2c &i2c, const LcdBusActions &actions,
                  const LcdTimer &timer);
-  void send_high_nibble(uint8_t byte, bool is_data) const override;
-  void send_byte(uint8_t byte, bool is_data) const override;
-  void begin() const override;
+  void send_high_nibble(uint8_t byte, bool is_data) override;
+  void send_byte(uint8_t byte, bool is_data) override;
+  void begin() override;
 
 private:
   uint8_t address_;

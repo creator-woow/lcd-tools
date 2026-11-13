@@ -2,7 +2,7 @@
 
 #include "lcd_arduino.h"
 
-ArduinoGpioLcd display;
+ArduinoPcf8574Lcd display;
 
 void setup() {
   display.init();

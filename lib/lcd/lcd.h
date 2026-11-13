@@ -49,7 +49,7 @@ struct LcdCursorPosition {
 };
 
 struct LcdConfig {
-  const LcdBus &bus;
+  LcdBus &bus;
   const LcdTimer &timer;
   const LcdRowsConfig &rows_config;
 };
@@ -74,7 +74,7 @@ private:
   void send_data(uint8_t data);
 
   const LcdRowsConfig rows_config_;
-  const LcdBus &bus_;
+  LcdBus &bus_;
   const LcdTimer &timer_;
   LcdCursorPosition cursor_position_{0, 0};
   LcdAnimationState animations_states_[LcdRowsConfig::max_rows];

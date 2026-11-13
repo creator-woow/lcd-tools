@@ -14,13 +14,13 @@ struct LcdGpioPins {
 class LcdGpioBus : public LcdBus {
 public:
   explicit LcdGpioBus(const LcdBusActions &actions, const LcdTimer &timer,
-                      const LcdGpioPins pins);
+                      LcdGpioPins pins);
 
-  void begin() const override;
-  void send_high_nibble(uint8_t byte, bool is_data) const override;
-  void send_byte(uint8_t byte, bool is_data) const override;
+  void begin() override;
+  void send_high_nibble(uint8_t byte, bool is_data) override;
+  void send_byte(uint8_t byte, bool is_data) override;
 
 private:
-  void pulse_enable_pin() const;
+  void pulse_enable_pin();
   const LcdGpioPins pins_;
 };

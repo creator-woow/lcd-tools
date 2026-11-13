@@ -20,9 +20,9 @@ public:
   explicit LcdBus(const LcdBusActions &actions, const LcdTimer &timer);
   virtual ~LcdBus() = default;
 
-  virtual void send_high_nibble(uint8_t byte, bool is_data) const = 0;
-  virtual void send_byte(uint8_t byte, bool is_data) const = 0;
-  virtual void begin() const = 0;
+  virtual void send_high_nibble(uint8_t byte, bool is_data) = 0;
+  virtual void send_byte(uint8_t byte, bool is_data) = 0;
+  virtual void begin() = 0;
 
 protected:
   const LcdBusActions &actions_;

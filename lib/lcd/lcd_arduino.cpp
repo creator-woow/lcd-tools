@@ -14,6 +14,8 @@ LcdTimer arduino_lcd_timer{
     .delay_milliseconds = delay,
 };
 
+WireI2c arduino_default_i2c;
+
 ArduinoGpioLcdBus::ArduinoGpioLcdBus(LcdGpioPins pins)
     : LcdGpioBus(arduino_bus_actions, arduino_lcd_timer, pins) {}
 
@@ -22,10 +24,13 @@ ArduinoLcd::ArduinoLcd(const ArduinoLcdConfig &config)
                     .timer = arduino_lcd_timer,
                     .rows_config = config.rows_config}) {}
 
-ArduinoGpioLcdBus ArduinoGpioLcd::init_bus(LcdGpioPins pins) {
-  return ArduinoGpioLcdBus{pins};
-}
-
 ArduinoGpioLcd::ArduinoGpioLcd(const ArduinoGpioLcdConfig &config)
-    : ArduinoLcd(
-          {.bus = init_bus(config.pins), .rows_config = config.rows_config}) {}
+    : ArduinoGpioLcdBus(config.pins),
+      ArduinoLcd({.bus = *this, .rows_config = config.rows_config}) {}
+
+ArduinoPcf8574LcdBus::ArduinoPcf8574LcdBus(uint8_t address, I2c &i2c)
+    : LcdPcdf8574Bus(address, i2c, arduino_bus_actions, arduino_lcd_timer) {};
+
+ArduinoPcf8574Lcd::ArduinoPcf8574Lcd(const ArduinoPcf8574LcdConfig &config)
+    : ArduinoPcf8574LcdBus(config.address, config.i2c),
+      ArduinoLcd({.bus = *this, .rows_config = config.rows_config}) {}

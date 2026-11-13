@@ -1,10 +1,10 @@
 #include "lcd_gpio_bus.h"
 
 LcdGpioBus::LcdGpioBus(const LcdBusActions &actions, const LcdTimer &timer,
-                       const LcdGpioPins pins)
+                       LcdGpioPins pins)
     : LcdBus(actions, timer), pins_(pins) {}
 
-void LcdGpioBus::begin() const {
+void LcdGpioBus::begin() {
   actions_.set_output_pin(pins_.pin_rs);
   actions_.set_output_pin(pins_.pin_e);
   actions_.set_output_pin(pins_.pin_d4);
@@ -13,7 +13,7 @@ void LcdGpioBus::begin() const {
   actions_.set_output_pin(pins_.pin_d7);
 }
 
-void LcdGpioBus::pulse_enable_pin() const {
+void LcdGpioBus::pulse_enable_pin() {
   actions_.digital_write(pins_.pin_e, false);
   timer_.delay_microseconds(1);
   actions_.digital_write(pins_.pin_e, true);
@@ -22,7 +22,7 @@ void LcdGpioBus::pulse_enable_pin() const {
   timer_.delay_microseconds(50);
 }
 
-void LcdGpioBus::send_high_nibble(uint8_t byte, bool is_data) const {
+void LcdGpioBus::send_high_nibble(uint8_t byte, bool is_data) {
   actions_.digital_write(pins_.pin_rs, is_data);
   actions_.digital_write(pins_.pin_d7, byte & 0b10000000);
   actions_.digital_write(pins_.pin_d6, byte & 0b01000000);
@@ -31,7 +31,7 @@ void LcdGpioBus::send_high_nibble(uint8_t byte, bool is_data) const {
   pulse_enable_pin();
 }
 
-void LcdGpioBus::send_byte(uint8_t byte, bool is_data) const {
+void LcdGpioBus::send_byte(uint8_t byte, bool is_data) {
   actions_.digital_write(pins_.pin_rs, is_data);
   actions_.digital_write(pins_.pin_d7, byte & 0b10000000);
   actions_.digital_write(pins_.pin_d6, byte & 0b01000000);
