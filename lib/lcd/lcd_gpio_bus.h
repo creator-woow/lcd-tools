@@ -1,26 +1,27 @@
 #pragma once
 
+#include "gpio.h"
+
 #include "lcd_bus.h"
 
 struct LcdGpioPins {
-  uint8_t pin_e = 11;
-  uint8_t pin_rs = 12;
-  uint8_t pin_d4 = 2;
-  uint8_t pin_d5 = 3;
-  uint8_t pin_d6 = 4;
-  uint8_t pin_d7 = 5;
+  PinNumber pin_e = 11;
+  PinNumber pin_rs = 12;
+  PinNumber pin_d4 = 2;
+  PinNumber pin_d5 = 3;
+  PinNumber pin_d6 = 4;
+  PinNumber pin_d7 = 5;
 };
 
 class LcdGpioBus : public LcdBus {
 public:
-  explicit LcdGpioBus(const LcdBusActions &actions, const LcdTimer &timer,
-                      LcdGpioPins pins);
+  explicit LcdGpioBus(Gpio &gpio, Clock &clock, LcdGpioPins pins);
 
   void begin() override;
   void send_high_nibble(uint8_t byte, bool is_data) override;
-  void send_byte(uint8_t byte, bool is_data) override;
 
 private:
   void pulse_enable_pin();
+  Gpio &gpio_;
   const LcdGpioPins pins_;
 };

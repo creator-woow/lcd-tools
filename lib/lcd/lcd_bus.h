@@ -2,29 +2,21 @@
 
 #include <stdint.h>
 
-#include "lcd_timer.h"
-
-using DigitalWriteHandler = void (*)(uint8_t pin, bool high);
-using SetOutputPinModeHandler = void (*)(uint8_t pin);
-using SetInputPinModeHandler = void (*)(uint8_t pin);
-using DelayMicroseconds = void (*)(unsigned int microseconds);
-
-struct LcdBusActions {
-  DigitalWriteHandler digital_write;
-  SetOutputPinModeHandler set_output_pin;
-  SetInputPinModeHandler set_input_pin;
-};
+#include "clock.h"
 
 class LcdBus {
 public:
-  explicit LcdBus(const LcdBusActions &actions, const LcdTimer &timer);
+  explicit LcdBus(Clock &clock);
   virtual ~LcdBus() = default;
 
   virtual void send_high_nibble(uint8_t byte, bool is_data) = 0;
-  virtual void send_byte(uint8_t byte, bool is_data) = 0;
   virtual void begin() = 0;
 
+  void send_byte(uint8_t byte, bool is_data) {
+    send_high_nibble(byte, is_data);
+    send_high_nibble(byte << 4, is_data);
+  }
+
 protected:
-  const LcdBusActions &actions_;
-  const LcdTimer &timer_;
+  Clock &clock_;
 };

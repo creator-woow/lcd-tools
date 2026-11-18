@@ -1,81 +1,27 @@
 #pragma once
 
-#include <WString.h>
+#include "character_animation.h"
+#include "character_display.h"
 
-#include "lcd_bus.h"
-#include "lcd_timer.h"
-
-enum class LcdCommand : uint8_t {
-  ClearDisplay = 0x01,
-  ReturnHome = 0x02,
-  EntryModeLeft = 0x04,
-  EntryModeRight = 0x06,
-  DisplayOff = 0x08,
-  DisplayOn = 0x0C,
-  DisplayOnCursor = 0x0E,
-  DisplayOnBlink = 0x0F,
-  SetDdramAddress = 0x80,
-  FunctionSet8Bit = 0x30,
-  FunctionSet4Bit = 0x20,
-  FunctionSet4Bit2Line = 0x28
-};
-
-enum class LcdAnimationDirection : uint8_t { Left, Rigth };
-
-struct LcdAnimationConfig {
-  static constexpr uint8_t infite_row_gap_width = 6;
-  String text;
-  LcdAnimationDirection direction = LcdAnimationDirection::Left;
-  bool infinite = false;
-  uint16_t step_delay_ms = 500;
-};
-
-struct LcdAnimationState : LcdAnimationConfig {
-  bool active = false;
-  uint8_t offset = 0;
-  unsigned long last_tick_time = 0;
-};
-
-struct LcdRowsConfig {
-  static constexpr uint8_t max_rows = 4;
-  uint8_t amount = 2;
-  uint8_t width = 16;
-  uint8_t starts_addresses[max_rows] = {0x00, 0x40, 0x00, 0x00};
-};
-
-struct LcdCursorPosition {
-  uint8_t row;
-  uint8_t cell;
-};
-
-struct LcdConfig {
-  LcdBus &bus;
-  const LcdTimer &timer;
-  const LcdRowsConfig &rows_config;
-};
+struct LcdGeometry {};
 
 class Lcd {
 public:
-  explicit Lcd(const LcdConfig &config);
+  Lcd(CharacterDisplay &driver);
   void init();
+  void tick(unsigned long ms_now);
   void print_line(const char *text);
-  void print_animated_line(const LcdAnimationConfig &rows_config);
-  void tick();
+  void print_animated_line(const CharacterAnimationConfig &animation_config,
+                           unsigned long ms_now);
+  void set_cursor_next_row();
 
 private:
-  void set_cursor(LcdCursorPosition position);
-  void tick_left_direction_animation(const LcdAnimationState &animation);
-  void tick_rigth_direction_animation(const LcdAnimationState &animation);
-  void set_cursor_next_row();
-  void clear();
-  void send_command(LcdCommand command);
-  void send_command(uint8_t command);
-  void send_nibble_command(LcdCommand command);
-  void send_data(uint8_t data);
+  static constexpr uint8_t max_rows = 4;
 
-  const LcdRowsConfig rows_config_;
-  LcdBus &bus_;
-  const LcdTimer &timer_;
-  LcdCursorPosition cursor_position_{0, 0};
-  LcdAnimationState animations_states_[LcdRowsConfig::max_rows];
+  CharacterDisplay &driver_;
+  CharacterAnimationState animations_states_[Lcd::max_rows];
+  CharacterDisplayCursorPosition cursor_position_{0, 0};
+
+  void tick_left_direction_animation(const CharacterAnimationState &animation);
+  void tick_rigth_direction_animation(const CharacterAnimationState &animation);
 };

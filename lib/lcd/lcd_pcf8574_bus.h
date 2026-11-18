@@ -1,15 +1,14 @@
 #pragma once
 
+#include "clock.h"
 #include "i2c.h"
 
 #include "lcd_bus.h"
 
-class LcdPcdf8574Bus : public LcdBus {
+class LcdPcf8574Bus : public LcdBus {
 public:
-  LcdPcdf8574Bus(uint8_t address, I2c &i2c, const LcdBusActions &actions,
-                 const LcdTimer &timer);
+  LcdPcf8574Bus(uint8_t address, I2c &i2c, Clock &clock);
   void send_high_nibble(uint8_t byte, bool is_data) override;
-  void send_byte(uint8_t byte, bool is_data) override;
   void begin() override;
 
 private:

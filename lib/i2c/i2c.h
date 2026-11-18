@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Wire.h>
+#include <stdint.h>
 
 enum class I2cStatus : uint8_t {
   Success = 0,
@@ -16,5 +16,5 @@ public:
   virtual ~I2c() = default;
 
   virtual void begin() = 0;
-  virtual I2cStatus write(int address, uint8_t byte) = 0;
+  virtual I2cStatus write(uint8_t address, uint8_t byte) = 0;
 };
